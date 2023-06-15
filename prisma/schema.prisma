@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  firstName String
+  lastName String
+  email String @unique
+  dateOfBirth DateTime
+  plainPassword String
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  description String @db.Text
+  items Item[]
+}
+
+model Item {
+  id Int @id @default(autoincrement())
+  name String
+  description String @db.Text
+  itemImage String @db.LongText
+  quantity Int
+  category Category @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  categoryId Int
+  transactions ItemToTransaction[]
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+  type String
+  time DateTime
+  items ItemToTransaction[]
+}
+
+model ItemToTransaction {
+  item Item @relation(fields: [itemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  itemId Int
+  transaction Transaction @relation(fields: [transactionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  transactionId Int
+  quantity Float
+  @@id([itemId, transactionId])
+}
